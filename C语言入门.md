@@ -1,6 +1,6 @@
 # C语言入门
 
-*参考资料：《C Primer Plus（Stephen Prata）》、《C程序设计语言 (Brian W. Kernighan, Dennis M. Ritchie) 》、[翁恺C语言_](https://www.bilibili.com/video/BV1dr4y1n7vA?spm_id_from=333.788.videopod.episodes&vd_source=4fc959a02ef946a334065d8f36a22190&p=2)*、[尚硅谷C语言零基础入门教程（宋红康c语言程序设计精讲，含C语言考研真题）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1Bh4y1q7Nt/?spm_id_from=333.337.search-card.all.click&vd_source=4fc959a02ef946a334065d8f36a22190)
+*参考资料：《C Primer Plus（Stephen Prata）》、《C程序设计语言 (Brian W. Kernighan, Dennis M. Ritchie) 》、[翁恺C语言_](https://www.bilibili.com/video/BV1dr4y1n7vA?spm_id_from=333.788.videopod.episodes&vd_source=4fc959a02ef946a334065d8f36a22190&p=2)*、[尚硅谷C语言零基础入门教程（宋红康c语言程序设计精讲，含C语言考研真题）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1Bh4y1q7Nt/?spm_id_from=333.337.search-card.all.click&vd_source=4fc959a02ef946a334065d8f36a22190)、[C 语言教程 | 菜鸟教程](https://www.runoob.com/cprogramming/c-tutorial.html)
 
 **前置课程：C语言环境配置**
 
@@ -12,11 +12,14 @@
 
 人类世界老板给员工下命令用的是人类听得懂的语言，如汉语英语，人给计算机下命令则是用的计算机认识的计算机语言。
 
+计算机计算：CPU、寄存器、内存
+
 ### 计算机语言历史
 
 **机器语言->**
 
 ```
+0001100100010010
 控制部分1        控制部分2       数据1      数据2
 0001（算数运算）  1001（加法）    0001（1）  0010（2）
 0010（逻辑运算）  1010（逻辑与）   0001（1）  0000（0） 
@@ -130,17 +133,6 @@ c=a+b;
   - **快速退出：** 引入了 `_Exit()` 和 `quick_exit()` 函数，提供比 `exit()` 更快速的程序终止方式。
   - **`_Noreturn` 函数说明符：** 指明一个函数不会返回给调用者（如 `exit()` 函数）。
 
-------
-
-### 5. C17 / C18 - **缺陷修复版，而非新特性**
-
-这个版本没有引入新的语言特性，主要是一个“缺陷修复”版本。
-
-- **核心变化：**
-  - 整合和修正了C11标准中发现的技术缺陷（Defect Reports, DRs）。
-  - 提高了标准的稳定性和一致性。
-  - 可以看作是 **C11的一个完善版**。
-
 # 2.第一个C程序：hello world
 
 - *如何进行“hello world”？*
@@ -164,7 +156,14 @@ int main() //main函数，程序的唯一入口
 */
 ```
 
+基础语法：
 
+- **关键字（Keywords）**
+- **标识符（Identifiers）**
+- **常量（Constants）**
+- **字符串字面量（String Literals）**
+- **运算符（Operators）**
+- **分隔符（Separators）**
 
 ## 编译（构建）
 
@@ -219,7 +218,7 @@ main函数
 #include <stdio.h>
 int main() 
 {
-    printf("1+1=%d\n", 1+1);//decimal
+    printf("1+1=%d", 1+1);//decimal
     return 0;
 }
 ```
@@ -233,7 +232,8 @@ int main()
 int main() 
 {
     printf("please enter two numbers:\n");
-    int a, b;
+    int a;
+    int b;
     scanf("%d %d", &a, &b);
     printf("The sum of %d and %d is %d\n", a, b, a + b);
     return 0;
@@ -245,7 +245,7 @@ int main()
 
 ***
 
-变量：数据类型 变量名;  int a;
+变量：数据类型 变量名;  （范围、变量名规则、占用内存大小、格式化输入/输出）
 
 运算符初步
 
@@ -261,7 +261,7 @@ printf、scanf
 
 
 
-# 4.更多数据类型，常量
+# 4.更多数据类型，更多运算符，常量
 
 - *小数如何表示？*
 
@@ -283,7 +283,7 @@ int main()
 
 ```
 
-- *如何替换字符串中的字符？*
+- *字符如何表示？*
 
 **例程五：grades**
 
@@ -309,7 +309,7 @@ int main()
 
 
 
-# 5.函数、分支
+# 5.函数、分支、调试
 
 - *每次计算面积都要写一遍式子吗？*
 - 能不能一个程序既计算圆的面积又计算正方形面积？
