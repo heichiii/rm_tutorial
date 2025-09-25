@@ -1,6 +1,6 @@
 # C语言入门
 
-*参考资料：《C Primer Plus（Stephen Prata）》、《C程序设计语言 (Brian W. Kernighan, Dennis M. Ritchie) 》、[翁恺C语言_](https://www.bilibili.com/video/BV1dr4y1n7vA?spm_id_from=333.788.videopod.episodes&vd_source=4fc959a02ef946a334065d8f36a22190&p=2)*、[尚硅谷C语言零基础入门教程（宋红康c语言程序设计精讲，含C语言考研真题）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1Bh4y1q7Nt/?spm_id_from=333.337.search-card.all.click&vd_source=4fc959a02ef946a334065d8f36a22190)
+*参考资料：《C Primer Plus（Stephen Prata）》、《C程序设计语言 (Brian W. Kernighan, Dennis M. Ritchie) 》、[翁恺C语言_](https://www.bilibili.com/video/BV1dr4y1n7vA?spm_id_from=333.788.videopod.episodes&vd_source=4fc959a02ef946a334065d8f36a22190&p=2)*、[尚硅谷C语言零基础入门教程（宋红康c语言程序设计精讲，含C语言考研真题）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1Bh4y1q7Nt/?spm_id_from=333.337.search-card.all.click&vd_source=4fc959a02ef946a334065d8f36a22190)、[C 语言教程 | 菜鸟教程](https://www.runoob.com/cprogramming/c-tutorial.html)
 
 **前置课程：C语言环境配置**
 
@@ -12,11 +12,14 @@
 
 人类世界老板给员工下命令用的是人类听得懂的语言，如汉语英语，人给计算机下命令则是用的计算机认识的计算机语言。
 
+计算机计算：CPU、寄存器、内存
+
 ### 计算机语言历史
 
 **机器语言->**
 
 ```
+0001100100010010
 控制部分1        控制部分2       数据1      数据2
 0001（算数运算）  1001（加法）    0001（1）  0010（2）
 0010（逻辑运算）  1010（逻辑与）   0001（1）  0000（0） 
@@ -130,17 +133,6 @@ c=a+b;
   - **快速退出：** 引入了 `_Exit()` 和 `quick_exit()` 函数，提供比 `exit()` 更快速的程序终止方式。
   - **`_Noreturn` 函数说明符：** 指明一个函数不会返回给调用者（如 `exit()` 函数）。
 
-------
-
-### 5. C17 / C18 - **缺陷修复版，而非新特性**
-
-这个版本没有引入新的语言特性，主要是一个“缺陷修复”版本。
-
-- **核心变化：**
-  - 整合和修正了C11标准中发现的技术缺陷（Defect Reports, DRs）。
-  - 提高了标准的稳定性和一致性。
-  - 可以看作是 **C11的一个完善版**。
-
 # 2.第一个C程序：hello world
 
 - *如何进行“hello world”？*
@@ -164,7 +156,14 @@ int main() //main函数，程序的唯一入口
 */
 ```
 
+基础语法：
 
+- **关键字（Keywords）**
+- **标识符（Identifiers）**
+- **常量（Constants）**
+- **字符串字面量（String Literals）**
+- **运算符（Operators）**
+- **分隔符（Separators）**
 
 ## 编译（构建）
 
@@ -219,7 +218,7 @@ main函数
 #include <stdio.h>
 int main() 
 {
-    printf("1+1=%d\n", 1+1);//decimal
+    printf("1+1=%d", 1+1);//decimal
     return 0;
 }
 ```
@@ -233,7 +232,8 @@ int main()
 int main() 
 {
     printf("please enter two numbers:\n");
-    int a, b;
+    int a;
+    int b;
     scanf("%d %d", &a, &b);
     printf("The sum of %d and %d is %d\n", a, b, a + b);
     return 0;
@@ -245,7 +245,7 @@ int main()
 
 ***
 
-变量：数据类型 变量名;  int a;
+变量：数据类型 变量名;  （范围、变量名规则、占用内存大小、格式化输入/输出）
 
 运算符初步
 
@@ -261,7 +261,7 @@ printf、scanf
 
 
 
-# 4.更多数据类型，常量
+# 4.更多数据类型，更多运算符，常量
 
 - *小数如何表示？*
 
@@ -283,11 +283,23 @@ int main()
 
 ```
 
-- *如何替换字符串中的字符？*
+- *字符如何表示？*
 
 **例程五：grades**
 
-```
+```c
+#include <stdio.h>
+int main()
+{
+    char letter;
+    printf("Enter the letter:\n");
+    scanf("%c",&letter);
+    printf("The letter is %c\n",letter);
+    char pattern[10] = "circle";
+  //char *pattern = "circle";
+    printf("%s\n",pattern);
+    return 0;
+}
 ```
 
 
@@ -307,14 +319,110 @@ int main()
 
 
 
+# 5.数组，字符串
 
 
-# 5.函数、分支
+
+- *如何定义数组和使用数组*
+
+**例程六：存储五位同学的成绩并根据需求调用**
+
+```c
+#include <stdio.h>
+int main()
+{
+    //注：若定义时不赋值，则必须输入数组大小
+    int grade[]={88,89,73,99,91};
+    // int grade[5];
+    // grade[0]=88;
+    // grade[1]=89;
+    // grade[2]=73;
+    // grade[3]=99;
+    // grade[4]=91;
+    int n;
+    printf("Enter the number of student:");
+    scanf("%d",&n);
+    printf("The grade of student %d is:%d",n,grade[n-1]);
+    return 0;
+}
+
+```
+
+- *如何输入字符串？*
+
+**例程七：greet**
+
+```c
+#include <stdio.h>
+int main() 
+{
+    printf("What's your name?\n");
+    char name[50];
+    scanf("%49s", name); // Read a string input safely
+    printf("Hello, %s!\n", name);
+}
+```
+
+- *如何处理字符串？*
+
+**例程八：字符串的长度，拼接，比较**
+
+```c
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+    char str1[] = "hello";
+    char str2[] = "world";
+    printf("%d  %d\n",strlen(str1),strlen(str2));
+
+    char result[50];
+    strcpy(result,str1);	//将str1复制粘贴到result
+    strcat(result,",  ");	//拼接后面的变量到result后
+    strcat(result,str2);	//strcat会自动处理\0
+    printf("%s\n",result);
+    printf("\0%s\n",result);//认识\0的作用
+
+    char str3[] = "apple";
+    char str4[] = "banana";
+    
+    int end = strcmp(str3,str4);	//根据ascii码一个一个比较
+    if(end > 0)						//若str3大于str4则返回正数
+    {
+        printf("%s more than %s\n",str3,str4);
+    }
+    else if(end < 0)				//若str3小于str4则返回负数
+    {
+        printf("%s less than %s\n",str3,str4);
+    }
+    else							//若完全相同则返回0
+    {
+        printf("%s equal to %s\n",str3,str4);
+    }
+    return 0;
+}
+```
+
+
+
+
+
+数组
+
+字符串输入与输出
+
+字符串基本操作
+
+strcpy
+
+strcat
+
+# 6.函数、分支、调试
 
 - *每次计算面积都要写一遍式子吗？*
 - 能不能一个程序既计算圆的面积又计算正方形面积？
 
-**例程五：计算圆的面积和正方形面积**
+**例程九：计算圆的面积和正方形面积**
 
 ```c
 #include <stdio.h>
@@ -349,10 +457,15 @@ int main()
 
 - *普通函数能传递参数，main能不能？*
 
-**例程六：更好用的加法计算器**
+**例程十：更好用的加法计算器**
+
+注：此例程需要在终端运行时同时传入两个整数参数
+
+如：.\test.exe  10  20
 
 ```c
 #include <stdio.h>
+#include <stdlib.h>
 int main(int argc, char *argv[])
 {
     if(argc != 3) {
@@ -374,11 +487,13 @@ int main(int argc, char *argv[])
 
 ASCII
 
-# 6.数组、循环
+终端运行
+
+# 7.循环
 
 - *如果有好多个图形的面积需要计算，有没有更友好的写法？*
 
-**例程七：循环计算多个面积**
+**例程十一：循环计算多个面积**
 
 ```c
 #include <stdio.h>
@@ -401,21 +516,55 @@ int main()
 
 - *如果一开始并不知道我要计算几个面积怎么办？*
 
+**例程十二：自定义计算面积数**
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#define PI 3.14159
+float SquareMeasure(int radius)
+{
+    return PI*radius*radius;
+}
+int main(int count,char *argv[])
+{
+    if(count != 2)
+    {
+        printf("Usage:%s <num>",argv[0]);
+        return 1;
+    }
+    int num = atoi(argv[1]);
+    int radius[num];
+    for(int i=num;i>0;i--)	//注意此时i在循环中的变化
+    {						//根据i以及使用需求决定下列循环中使用i时
+        printf("Enter the radius of circle %d:  ",6-i);
+        scanf("%d",&radius[5-i]);
+    }
+    for(int i=0;i<num;i++)
+    {
+        printf("Area of the circle %d: %.2f\n",i+1,SquareMeasure(radius[i]));
+    }
+    return 0;
+}
+```
+
 
 
 数组
 
 循环
 
+函数传参与返回值
+
 动态申请内存
 
 代码规范
 
-# 7.字符串
+# 8.字符串
 
 - *如何输入字符串？*
 
-**例程八：greet**
+**例程十三：greet**
 
 ```c
 #include <stdio.h>
@@ -430,25 +579,132 @@ int main()
 
 - *如何处理字符串？*
 
+**例程十四：字符串的长度，拼接，比较**
+
+```c
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+    char str1[] = "hello";
+    char str2[10] = "world";
+    printf("%d  %d\n",strlen(str1),strlen(str2));
+
+    char result[50];
+    strcpy(result,str1);	//将str1复制粘贴到result
+    strcat(result,",  ");	//拼接后面的变量到result后
+    strcat(result,str2);	//strcat会自动处理\0
+    printf("%s\n",result);
+    printf("\0%s\n",result);//认识\0的作用
+
+    char str3[] = "apple";
+    char str4[] = "banana";
+    
+    int end = strcmp(str3,str4);	//根据ascii码一个一个比较
+    if(end > 0)						//若str3大于str4则返回正数
+    {
+        printf("%s more than %s\n",str3,str4);
+    }
+    else if(end < 0)				//若str3小于str4则返回负数
+    {
+        printf("%s less than %s\n",str3,str4);
+    }
+    else							//若完全相同则返回0
+    {
+        printf("%s equal to %s\n",str3,str4);
+    }
+    return 0;
+}
+```
 
 
-# 8.结构体
 
 
 
-# 9.指针、地址
+
+
+字符串输入与输出
+
+字符串基本操作
+
+strcpy
+
+strcat
+
+# 9.结构体
+
+- *怎么将不同类型数据集成到一个变量中
+
+**例程十五：储存学生信息并打印**
+
+```c
+#include <stdio.h>
+typedef struct
+{
+    char Name[50];
+    int Age;
+    char Level;
+    float Grade;
+}StudentInformation;
+/*  定义了一个名为StudentInformation的变量类型
+    被这个类型定义的变量有四个元素，
+    Name[50],Age,Level,Grade
+    其中Name[50]和Level是字符变量，
+    Age是整型变量，Grade是浮点型变量     */
+int main()
+{
+    StudentInformation str[5];
+    //定义了StudentInformation类型的数组
+    printf("Enter the information(Name  Age  Level  Grade):\n");
+    for(int i=0;i<5;i++)
+    {
+        //调用结构体变量的规则：
+        scanf("%s %d %c %f",
+            &str[i].Name,   
+            &str[i].Age,
+            &str[i].Level,
+            &str[i].Grade);//提高代码可读性
+    }
+
+    for(int i=0;i<5;i++)
+    {
+        printf("The information of student %d is:\n",i+1);
+        printf("Name:%s    Age:%d    Level:%c    Grade:%.2f\n",
+                str[i].Name,
+                str[i].Age,
+                str[i].Level,
+                str[i].Grade);
+    }
+
+    return 0;
+}
+```
 
 
 
-# 10.数组深入
 
 
 
-# 11.指针传参
+
+结构体
+
+结构体定义
+
+代码规范与可读性
+
+# 10.指针、地址
 
 
 
-# 12.函数指针
+# 11.数组深入
+
+
+
+# 12.指针传参
+
+
+
+# 13.函数指针
 
 
 
