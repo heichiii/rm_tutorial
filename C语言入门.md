@@ -692,19 +692,468 @@ int main()
 
 代码规范与可读性
 
-# 10.指针、地址
+# 10.数据类型深入
+各个数据类型的数据是如何存在内存中的?
+### 整型（int, short, long, char）
+- **有符号整型**：使用补码表示
+- **无符号整型**：直接使用二进制原码
+```c
+int a = 10;        // 32位系统：0x0000000A
+short b = -5;      // 补码表示：0xFFFB
+unsigned char c = 255; // 0xFF
+```
 
+### 浮点型（float, double）
+- 遵循 **IEEE 754标准**
+- **float（32位）**：1位符号位 + 8位指数位 + 23位尾数位
+- **double（64位）**：1位符号位 + 11位指数位 + 52位尾数位
 
+### 数组
+- 连续内存
+- 元素类型与大小相同,按顺序排列
 
-# 11.数组深入
+```c
+int arr[3] = {1, 2, 3};
+// 内存布局：4+4+4=12字节
+```
 
+### 结构体（struct）
+- 成员顺序存储
+- 可能存在内存填充以对齐
+```C
+struct Student {
+    short a;     // 偏移量:0        2字节(填充至4字节)   
+    int b;       // 偏移量:0+4=4    4字节               
+    char c[5];  //  偏移量:4+4=8    5字节(填充至8字节)    
+    float d;    //  偏移量:8+8=16   4字节(填充至8字节)    
+    double e;   //  偏移量:16+8=24  8字节                
+    char f;     // 偏移量:24+8=32   1字节(填充至8字节)    
+}; // 总大小为32+8=40字节
+```
 
+### 对齐
+基本类型的最大对齐通常是8字节\
+char        // 1字节对齐\
+short       // 2字节对齐\
+int         // 4字节对齐\
+float       // 4字节对齐\
+double      // 8字节对齐\
+long long   // 8字节对齐\
+void*       // 8字节对齐
+
+分析：最大对齐数为8\
+short a: 2字节，偏移0，占用0-1字节。\
+int b: 4字节，偏移量必须是4的整数倍，占用4-7字节。\
+char c[5]: 5字节，每个元素对齐数为1，占用8-12字节。\
+float d: 4字节，对齐数为4，下一个偏移量是13，但是13不是4的整数倍，需要填充3字节（13-15），占用16-19字节。\
+double e: 8字节，对齐数为8，需要填充4字节（20-23），然后e从偏移24开始，占用24-31字节。\
+char f: 1字节,结构体的总大小必须是最大对齐数的整数倍,填充至8字节
+
+- 修改对齐方式
+```c
+#pragma pack(1)  // 1字节对齐
+struct PackedStruct {
+    char a;
+    int b;
+    short c;
+}; // 总大小：1 + 4 + 2 = 7字节
+#pragma pack()   // 恢复默认对齐
+```
+
+### 字节顺序（Endianness）
+
+- 大端序（Big-endian）
+```c
+int num = 0x12345678;
+// 内存布局：0x1000:12 0x1001:34 0x1002:56 0x1003:78
+```
+
+- 小端序（Little-endian）
+```c
+int num = 0x12345678;
+// 内存布局：0x1000:78 0x1001:56 0x1002:34 0x1003:12
+```
+\
+0b(Binary),0O(Octal),0x(Hexadecimal)
+# 11.地址与指针
+## 内存与地址
+- 计算机内存由无数个存储单元组成，每个单元都有唯一对应的"门牌号" - 这就是内存地址
+- 通过地址可以找到这个变量对应的内存空间
+
+```c
+int main() {
+    int a = 10;
+    printf("变量a的值: %d\n", a);
+    printf("变量a的地址: %p\n", &a);  //%p输出pointer(指针) &是取地址运算符
+    
+    return 0;
+}
+```
+## 指针的基本概念
+### 什么是指针？
+指针是用来存放内存地址的变量。\
+当指针中存放着某变量的地址,我们就说这是指向某变量的指针
+
+### 指针变量的运算
+|&	|返回变量的地址。	|&a| 将给出变量的实际地址。|
+|  ----  | ----  |  ----  | ----  |
+|*	|指向一个变量。	    |*a/*p| 将指向一个变量/访问指针所指向变量的值   |
+|+/-	|加/减	    |p+n/p-n|指向向后/向前移动n个元素的位置|
+|++/--	|自增/自减	    |p++/p--| 将指向下/上一个元素的存储单元(跳跃长度与指针类型有关)|
+|==/!=	|判断是否相等/是否不相等	    |p1==p2/p1!=p2|返回指针是否相等的判断结果|
+|<, >, <=, >=	|判断地址大小	    |p1>=p2/p1<=p2|判断一个指针是否在另一个指针之前或之后|
+|NULL |空指针|指针声明后并不会自动赋值,可以手动赋值NULL
+
+### 指针变量的声明
+指针的类型必须与它所指向的变量类型一致
+```c
+int    *ip;    /* 一个整型的指针 */
+double *dp;    /* 一个 double 型的指针 */
+float  *fp;    /* 一个浮点型的指针 */
+char   *ch;    /* 一个字符型的指针 */
+```
+
+### 指针的赋值运算
+```c
+int main ()
+{
+   int  a = 20;   /* 变量*/
+   int  *ip;        /* 指针变量的声明 */
+ 
+   ip = &a;  /* 将ip赋值为变量a的地址/将ip指针指向a变量 */
+
+   printf("a 变量的值: %d\n", a );
+   printf("a 变量的地址: %p\n", &a  );
+ 
+   /* 在指针变量中存储的地址 */
+   printf("ip 变量的内容: %p\n", ip );
+   /* 访问指针指向的变量的值 */
+   printf("*ip 变量的值: %d\n", *ip );
+ 
+   return 0;
+}
+```
+### 数组与指针
+```c
+int main() {
+    int arr[5] = {1, 2, 3, 4, 5};
+    
+    // 不同的指针声明方式
+    int *p1 = arr;           // 指向数组首元素的指针
+    // 可以看出来,实际上数组名本身单独拿出来就是指向数组首元素的指针
+    int *p2 = &arr[0];       // 同上，更明确的写法
+    int (*p3)[5] = &arr;     // 指向整个数组的指针
+    
+    printf("p1: %p, 指向的值: %d\n", p1, *p1);
+    printf("p2: %p, 指向的值: %d\n", p2, *p2);
+    printf("p3: %p, 指向的数组首元素: %d\n", p3, **p3);
+
+    //因为数组中的元素在内存中是连续的,所以指针自增可以连续历遍所有数组元素
+    printf("arr : ");
+    for(int i = 0; i < 5; i++)
+    {
+        printf("%d,", *(p1++));
+    }
+    
+    // 指针运算
+    printf("\np3 + 1: %p\n", p3 + 1);  // 跳过整个数组(实际是跳过一行)
+    
+    return 0;
+}
+```
+
+#### 二维数组指针
+对于二维数组int arr[3][4]：\
+arr是数组名，表示整个二维数组，它的类型是int [3][4]。\
+arr本身的值是二维数组首元素的地址，即&arr[0][0]。\
+arr[i]（i从0到2）表示第i行，是一个一维数组，类型为int [4]。\
+arr[i]本身的值是第i行首元素的地址，即&arr[i][0]。\
+arr[i][j]表示第i行第j列的元素。
+```c
+int main() {
+    int arr[3][4] = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8},
+        {9, 10, 11, 12}
+    };
+    int (*p)[4] = arr; //指向数组第一行的指针
+    //arr的类型是int [3][4]，但是arr在表达式中会退化为指向第一行的指针，所以可以赋值给p。
+
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            printf("%d ", *(*(p + i) + j)); //等效printf("%d ", p[i][j]);
+        }
+        printf("\n");
+    }
+
+    //(p + i) -- 指向第i行的指针
+    //*(p + i) -- arr[i]
+    //(*(p + i) + j) -- 因为arr[i]又是数组第i行首元素的地址(指针),所以相当于指向arr[i][j]的指针
+    //*(*(p + i) + j) -- arr[i][j]的值
+
+    return 0;
+}
+```
+```C
+    int *p3 = matrix;  // 指向第一个元素
+    int (*p2)[4] = matrix;  // 指向第一行
+    int (*p1)[3][4] = &matrix; // 指向整个二维数组
+```
+
+### 结构体指针
+一般我们使用.访问结构体成员
+而对于结构体指针,我们使用->访问结构体成员,这经常在函数传参时用到
+```C
+// 定义结构体类型
+struct Book 
+{
+    char title[50];
+    float price;
+};
+
+void print_book(struct Book *book) // 使用结构体指针作为参数,避免复制整个结构体, 有利于优化性能
+{
+    printf("书名: %s\n", book->title);// 使用->访问结构体成员
+    printf("价格: %.2f\n", book->price);
+}
+
+int main() {
+    struct Book my_book = {"RM技巧", 25.0};
+    
+    print_book(&my_book);
+    
+    return 0;
+}
+```
+
+### 多级指针
+```C
+int main() {
+    int value = 100;
+    int *ptr1 = &value;     // 一级指针
+    int **ptr2 = &ptr1;     // 二级指针
+    int ***ptr3 = &ptr2;    // 三级指针
+    
+    printf("value: %d\n", value);
+    printf("*ptr1: %d\n", *ptr1);
+    printf("**ptr2: %d\n", **ptr2);
+    printf("***ptr3: %d\n", ***ptr3);
+    
+    // 通过多级指针修改变量值
+    **ptr2 = 200;
+    printf("修改后 value: %d\n", value);
+    
+    return 0;
+}
+```
+![int指针](./C语言入门.assets/img-1717237594412fca1724d0e2d601a3c6a113cdf5a5979.png) 
+
+#### 指针的算术运算
+```c
+#include <stdio.h>
+
+int main() {
+    int arr[5] = {10, 20, 30, 40, 50};
+    int *ptr = arr;
+    
+    printf("数组元素: ");
+    for(int i = 0; i < 5; i++) {
+        printf("%d ", arr[i]);
+    }
+
+    printf("初始: ptr指向arr[0], 值=%d, 地址=%p\n", *ptr, ptr);
+    
+    ptr = ptr + 1;  // 移动到下一个int元素
+    printf("ptr + 1: 指向arr[1], 值=%d, 地址=%p\n", *ptr, ptr);
+    
+    ptr = ptr + 2;  // 向后移动2个int元素
+    printf("ptr + 2: 指向arr[3], 值=%d, 地址=%p\n", *ptr, ptr);
+    
+    ptr = ptr - 1;  // 向前移动1个int元素
+    printf("ptr - 1: 指向arr[2], 值=%d, 地址=%p\n", *ptr, ptr);
+    
+    return 0;
+}
+```
+#### 指针的比较运算
+
+```c
+int main() {
+    int arr[5] = {10, 20, 30, 40, 50};
+    int *p1 = &arr[1];  // 指向第二个元素
+    int *p2 = &arr[3];  // 指向第四个元素
+    int *p3 = &arr[1];  // 同样指向第二个元素
+
+    printf("p1 = %p, p2 = %p, p3 = %p\n", p1, p2, p3);
+
+    // 比较运算
+    printf("p1 == p3: %d\n", p1 == p3);  // 1 (true)
+    printf("p1 != p2: %d\n", p1 != p2);  // 1 (true)
+    printf("p1 < p2:  %d\n", p1 < p2);   // 1 (true)
+    printf("p1 > p2:  %d\n", p1 > p2);   // 0 (false)
+    
+    return 0;
+}
+```
 
 # 12.指针传参
+### 传值 vs 传地址
+```c
+void useVariable(int copy) 
+{
+    printf("副本的地址: %p\n", &copy);
+    copy = 200;  // 修改的实际上是原参数的副本
+}
 
+void usePointer(int *copy) 
+{
+    printf("传入原变量的地址: %p\n", copy);
+    *copy = 200;  // 修改的就是原参数
+}
 
+int main() 
+{
+    int original = 50;
+
+    printf("原变量的地址: %p\n", &original);
+
+    useVariable(original);
+    
+    printf("传值函数修改后原变量: %d\n", original);  // 仍然是50
+
+    usePointer(&original);
+
+    printf("传值函数修改后原变量: %d\n", original);  // 200
+    
+    return 0;
+}
+```
 
 # 13.函数指针
+函数指针是指向函数的指针变量。它存储了函数的地址\
+可以通过它来调用函数
+### 函数指针的声明和使用
+```C
+int add(int a, int b) {
+    return a + b;
+}
 
+int subtract(int a, int b) {
+    return a - b;
+}
 
+int main() {
+    int (*func_ptr)(int, int);  // 声明函数指针
+    //函数返回类型 (*指针变量名)(函数参数列表);
 
+    //和数组类似,函数名本身就是指向函数的指针
+    func_ptr = add;             // 指向add函数,也可写为func_ptr = &add; 
+    printf("Add: %d\n", func_ptr(10, 5));  // 输出15
+
+    func_ptr = subtract;        // 指向subtract函数
+    printf("Subtract: %d\n", func_ptr(10, 5));  // 输出5
+
+    return 0;
+}
+```
+### 回调函数
+#### 函数指针作为某个函数的参数
+```C
+int add(int a, int b) {
+    return a + b;
+}
+
+int subtract(int a, int b) {
+    return a - b;
+}
+
+// 声明一个参数包含函数指针的函数
+void calculate(int (*function)(int, int), int a, int b) 
+{
+    printf("Result: %d\n", function(a, b));
+}
+/* 也可以使用typedef简化函数指针类型定义
+typedef int (*MathOperation)(int, int);
+void calculate(MathOperation op, int a, int b) {
+    printf("结果: %d\n", op(a, b));
+}
+*/
+
+int main() {
+    calculate(add, 10, 5);       // 输出15
+    calculate(subtract, 10, 5);  // 输出5
+
+    return 0;
+}
+```
+
+```C
+#include <stdlib.h>
+void __cdecl qsort(void *_Base,size_t _NumOfElements,size_t _SizeOfElements,int (__cdecl *_PtFuncCompare)(const void *,const void *));
+
+/**
+ * __cdecl是调用约定，表示C语言默认的函数调用约定
+ * @brief 使用快速排序算法对数组进行排序
+ * @param _Base [in] 指向要排序数组的首元素的指针
+ * @param _NumOfElements [in] 数组中的元素数量
+ * @param _SizeOfElements [in] 数组中每个元素的大小（字节数）
+ * @param _PtFuncCompare [in] 指向比较函数的指针，用于确定排序顺序
+ * 
+ * @return 无
+ */
+void __cdecl qsort(
+    void *_Base,                                 // [in] 要排序的数组
+    size_t _NumOfElements,                       // [in] 元素个数  
+    size_t _SizeOfElements,                      // [in] 每个元素的大小
+    int (__cdecl *_PtFuncCompare)(const void *, const void *)  // [in] 比较回调函数
+);
+
+/**
+ * @brief qsort使用的比较函数
+ * 
+ * @param a [in] 指向要比较的第一个元素的指针
+ * @param b [in] 指向要比较的第二个元素的指针  
+ * 
+ * @return 
+ *   <0 如果a应排在b前面
+ *    0 如果a和b相等
+ *   >0 如果a应排在b后面
+ */
+int compare(const void *a, const void *b) {
+    // 根据实际数据类型进行转换和比较
+    const 实际数据类型 *ptrA = (const 实际数据类型*)a;
+    const 实际数据类型 *ptrB = (const 实际数据类型*)b;
+    
+    // 实现比较逻辑
+
+    return /* 比较结果 */;
+}
+```
+```C
+#include <stdio.h>
+#include <stdlib.h>
+
+// 比较函数：整型升序排序
+int compare_int_asc(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b); //(int*)是将void指针转换为int指针,实际是*a - *b
+    //因为传入的是void指针,但我们知道它实际指向的是int类型
+    //return (*(int*)b - *(int*)a); //降序
+}
+
+int main() {
+    int arr[] = {5, 2, 8, 1, 9, 3};
+    int count = sizeof(arr) / sizeof(arr[0]);  // 计算数组元素个数
+    
+    // 升序排序
+    qsort(arr, count, sizeof(int), compare_int_asc); // 通过传入不同的比较函数灵活实现多种类型不同排序方式
+    
+    printf("升序排序结果: ");
+    for(int i = 0; i < count; i++) {
+        printf("%d ", arr[i]);
+    }
+    
+    return 0;
+}
+```
