@@ -694,14 +694,17 @@ int main()
 
 # 10.数据类型深入
 各个数据类型的数据是如何存在内存中的?
-### 整型（int, short, long, char）
+### 整型(int(4), short(2), long(4), char(1))
 - **有符号整型**：使用补码表示
 - **无符号整型**：直接使用二进制原码
 ```c
-int a = 10;        // 32位系统：0x0000000A
-short b = -5;      // 补码表示：0xFFFB
-unsigned char c = 255; // 0xFF
+int a = 10;        // 原码：0x 00(1) 00(2) 00(3) 0A(4)
+short b = -5;      // 补码：0x FF(1) FB(2)
+unsigned char c = 255; // 0x FF(1)
 ```
+uint8_t  // 1字节
+uint16_t // 2字节
+uint32_t // 4字节
 
 ### 浮点型（float, double）
 - 遵循 **IEEE 754标准**
@@ -1028,6 +1031,39 @@ int main()
     printf("传值函数修改后原变量: %d\n", original);  // 200
     
     return 0;
+}
+```
+除了传指针,我们也可以
+#### 如果在同一文件中,声明全局变量,在函数中可以直接使用并修改
+```C
+int global_var = 50; // 定义并初始化全局变量
+
+void modify_global(void) 
+{
+    global_var = 200; // 修改全局变量
+}
+
+int main() 
+{
+    printf("修改前全局变量: %d\n", global_var);  // 50
+    modify_global();
+    printf("修改后全局变量: %d\n", global_var);  // 200
+    return 0;
+}
+```
+#### 用extern关键字定义变量为外部变量,来实现在函数中改变变量的值
+```C
+//在文件A.h中
+extern int global_var; // 声明外部变量
+//在文件A.c中
+#include <A.h>
+int global_var = 50; // 定义并初始化外部变量
+
+//在文件B.c中
+#include <A.h> // 添加对应头文件引用
+void modify_global(void) 
+{
+    global_var = 200; // 修改外部变量
 }
 ```
 
